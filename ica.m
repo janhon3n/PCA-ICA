@@ -36,6 +36,14 @@ subplot(3,2,5);
 plot(Y(1,:));
 subplot(3,2,6);
 plot(Y(2,:));
+function p = plotMatrix(mat, rowCount, colCount, row)
+    [r, c] = size(mat);
+    e = min([colCount, r]);
+    for i = 1:e
+        subplot(rowCount,colCount,(row-1) * colCount + i);
+        plot(mat(i,:));
+    end
+end
 % Calculates the difference between two vectors.
 % The diffenrece is the euclidean distance between the vectors.
 % It is calculated with the formula Sqrt((a1 - b1)^2 + (a2 - b2)^2 + .... + (an - bn)^2)
