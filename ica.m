@@ -51,8 +51,8 @@ Y1 = matchMatrices(S, Y1, RowsToFind);
 Y2 = matchMatrices(S, Y2, RowsToFind);
 Y3 = matchMatrices(S, Y3, RowsToFind);
 
-plotMatrix(Y1, 4, RowsToAnalyze, 3, "fastICA result");
-plotMatrix(Y3, 4, RowsToAnalyze, 4, "PCA result");
+plotMatrix(Y1, 4, RowsToAnalyze, 3, 'fastICA result');
+plotMatrix(Y3, 4, RowsToAnalyze, 4, 'PCA result');
 
 % Print out the results
 for i = 1:RowsToFind
@@ -66,126 +66,4 @@ end
 for i = 1:RowsToFind
     d = calculateDifference(S(i,:), Y3(i,:));
     fprintf('The difference in signal #%i from PCA: %f\n', i, d);
-end
-
-
-%==== functions to help with plotting, calculating the difference between
-%vectors and matching the matrices =====
-
-% Plots the individual rows of the given matrix using subplot()
-%
-% Parameters:
-%   mat - the matrix
-%   rowCount - the amount of rows in the subplot
-%   colCount - the amount of rows to draw from the matrix, each to
-%               different column of the subplot
-%   row - the row of subplot to draw the rows of the matrix
-%
-function [] = plotMatrix(mat, rowCount, colCount, row, titl)
-    [r, c] = size(mat);
-    e = min([colCount, r]);
-    for i = 1:e
-        subplot(rowCount,colCount,(row-1) * colCount + i);
-        plot(mat(i,:));
-        title(strcat(titl, {' '}, num2str(i)));
-    end
-end
-
-
-% Matches the rows in the second matrix with the rows of the first one
-% by finding the ones that are closest to each other in terms of euclidean
-% distance.
-% If matrices row counts dont match, add all zero rows to mat2
-%
-% Parameters:
-%   mat1 - first matrix, the one that will be sorted
-%   mat2 - second matrix
-%   rows - the amount of rows to sort, starting with 1
-%
-% Returns:
-%   mat - sorted version of mat2
-%
-function [mat] = matchMatrices(mat1, mat2, rows)
-    mat = mat2;
-    [r, c] = size(mat);
-    [r2, c2] = size(mat1);
-    while r2 > r
-        r = r + 1;
-        mat(r, :) = zeros(1, c);
-    end
-    for i = rows:-1:1 % start from the end row => priorisize the first rows
-        [index, inverse, row] = findClosest(mat1, mat(i, :)); % find the index of the closest row
-        temp = mat(i, :); % swap the rows
-        mat(i, :) = mat(index, :);
-        mat(index, :) = temp;
-        if inverse == 1 % if inverse then inverse the row
-            mat(i, :) = mat(i, :) * -1;
-        end
-    end
-end
-
-
-% Finds the row of the given matrix that is closest to the given vector
-% Also checks inversed versions of each rows (each sample *= -1)
-%
-% Parameters:
-%   mat - The matrix
-%   vec - The vector
-%
-% Returns:
-%   index - The index of the row that is closest to the given vector
-%   inverse - True if the row is inversed, False if not
-%   row - the closest row in mat, inversed if closest that way
-%
-function [index, inverse, row] = findClosest(mat, vec)
-    [r, c] = size(mat);
-    if length(vec) ~= c
-        error("Vector length and matrix column count do not match.");
-    else        
-        min = calculateDifference(mat(1,:), vec);
-        inverse = 0;
-        index = 1;
-        row = mat(1,:);
-        for i = 2:r
-            dif = calculateDifference(mat(i,:), vec);
-            if(dif < min)
-               min = dif;
-               index = i;
-               row = mat(i, :);
-            end
-        end
-        for i = 1:r
-            dif = calculateDifference(mat(i,:), vec * -1);
-            if(dif < min)
-               min = dif;
-               index = i;
-               inverse = 1;
-               row = mat(i, :) * -1;
-            end
-        end
-    end
-end
-
-
-% Calculates the difference between two vectors.
-% The diffenrece is the euclidean distance between the vectors.
-% It is calculated with the formula Sqrt((a1 - b1)^2 + (a2 - b2)^2 + .... + (an - bn)^2)
-%
-% Parameters:
-%   vec1 - first vector
-%   vec2 - second vector
-%
-% Returns:
-% diff - The difference between the vectors
-%
-function [diff] = calculateDifference(vec1, vec2)
-    if length(vec1) ~= length(vec2)
-        error("Vectors must have the same length.");
-    else
-        diff = 0;
-        for i = 1:length(vec1)
-            diff = diff + (vec1(i) - vec2(i))^2;
-        end
-        diff = sqrt(diff);
-    end
 end
