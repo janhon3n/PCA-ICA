@@ -1,15 +1,12 @@
 % setup variables
+f = 44100; % sampling frequency
+Ts = 1/f; % sample time
 L = 50000; % samples per vector
 RowsToAnalyze = 4; % rows of the matricies to input to the analysing functions
 RowsToFind = 2; % rows to output from the analysing functions (number of signals we are looking for)
-ICAType = 'kurtosis'; % Type of ica for function fastICA. 'kurtosis' or 'negentropy'
 
 
-% constants
-f = 44100; % sampling frequency
-Ts = 1/f; % sample time
-
-fprintf('Searching for %i signals from the group of %i signals\n', RowsToFind, RowsToAnalyze);
+fprintf('Searching for %i signals from the group of %i signals', RowsToFind, RowsToAnalyze);
 
 % Load audio files into matrices
 s1 = audioread('samples/wave_1.wav')';
@@ -27,15 +24,15 @@ X = [x1(1:L);x2(1:L);x3(1:L);x4(1:L)];
 X = normalizeAudio(X);
 
 % Plot the original signals
-plotMatrix(S, 4, RowsToAnalyze, 1, 'Original signal');
+plotMatrix(S, 3, RowsToAnalyze, 1, 'Original signal');
 
 % Plot the mixed signals
-plotMatrix(X, 4, RowsToAnalyze, 2, 'Mixed signal');
+plotMatrix(X, 3, RowsToAnalyze, 2, 'Mixed signal');
 
 % Do the different types of analysis
-Y1 = fastICA(X(1:RowsToAnalyze, :), RowsToFind, ICAType, 0);
-Y2 = kICA(X(1:RowsToAnalyze, :), RowsToFind);
-Y3 = PCA(X(1:RowsToAnalyze, :), RowsToFind);
+Y1 = fastICA(X,RowsToFind);
+Y2 = kICA(X,RowsToFind);
+Y3 = PCA(X,RowsToFind);
 
 % Normalize results to range 0-1
 Y1 = normalizeAudio(Y1);
@@ -47,26 +44,27 @@ Y3 = normalizeAudio(Y3);
 % The matrices outputted from the analysis functions are matched by finding
 % the original signal in S that is closest to each of the outputted
 % signals.
-Y1 = matchMatrices(S, Y1, RowsToFind); 
-Y2 = matchMatrices(S, Y2, RowsToFind);
-Y3 = matchMatrices(S, Y3, RowsToFind);
+Y1 = matchMatrices(S, Y1, rowsToAnalyze); 
+Y2 = matchMatrices(S, Y2, rowsToAnalyze);
+Y3 = matchMatrices(S, Y3, rowsToAnalyze);
 
-plotMatrix(Y1, 4, RowsToAnalyze, 3, "fastICA result");
-plotMatrix(Y3, 4, RowsToAnalyze, 4, "PCA result");
+plotMatrix(Y1, 3, RowsToAnalyze, 3, "fastICA results");
 
-% Print out the results
 for i = 1:RowsToFind
     d = calculateDifference(S(i,:), Y1(i,:));
-    fprintf('The difference in signal #%i from fastICA: %f\n', i, d);
+    fprintf('The difference in signal #%i from fastICA: %f\n', d);
 end
-for i = 1:RowsToFind
-    d = calculateDifference(S(i,:), Y2(i,:));
-    fprintf('The difference in signal #%i from kICA: %f\n', i, d);
-end
-for i = 1:RowsToFind
-    d = calculateDifference(S(i,:), Y3(i,:));
-    fprintf('The difference in signal #%i from PCA: %f\n', i, d);
-end
+
+d1 = calculateDifference(S(1,:), Y2(1,:));
+d2 = calculateDifference(S(2,:), Y2(2,:));
+fprintf('The difference in s1 from kICA: %f\n', d1);
+fprintf('The difference in s2 from kICA: %f\n', d2); 
+
+d1 = calculateDifference(S(1,:), Y3(1,:));
+d2 = calculateDifference(S(2,:), Y3(2,:));
+fprintf('The difference in s1 from PCA: %f\n', d1);
+fprintf('The difference in s2 from PCA: %f\n', d2); 
+
 
 
 %==== functions to help with plotting, calculating the difference between
