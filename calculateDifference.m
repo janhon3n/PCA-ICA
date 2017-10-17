@@ -11,7 +11,7 @@
 %
 function [diff] = calculateDifference(vec1, vec2)
     if length(vec1) ~= length(vec2)
-        error("Vectors must have the same length.");
+        error('Vectors must have the same length.');
     else
         diff = 0;
         for i = 1:length(vec1)

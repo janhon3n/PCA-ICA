@@ -14,7 +14,7 @@
 function [index, inverse, row] = findClosest(mat, vec)
     [r, c] = size(mat);
     if length(vec) ~= c
-        error("Vector length and matrix column count do not match.");
+        error('Vector length and matrix column count do not match.');
     else        
         min = calculateDifference(mat(1,:), vec);
         inverse = 0;
