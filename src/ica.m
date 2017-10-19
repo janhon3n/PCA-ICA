@@ -3,7 +3,7 @@ L = 50000; % samples per vector
 RowsToAnalyze = 4; % rows of the matricies to input to the analysing functions
 RowsToFind = 2; % rows to output from the analysing functions (number of signals we are looking for)
 ICAType = 'kurtosis'; % Type of ica for function fastICA. 'kurtosis' or 'negentropy'
-
+PlotFunction = 'fastICA'; % The function results to plot {'fastICA', 'kICA', 'PCA'}
 
 % constants
 f = 44100; % sampling frequency
@@ -27,17 +27,17 @@ X = [x1(1:L);x2(1:L);x3(1:L);x4(1:L)];
 X = normalizeAudio(X);
 
 % Plot the original signals
-plotMatrix(S, 4, RowsToAnalyze, 1, 'Original signal');
+plotMatrix(S, 3, RowsToAnalyze, 1, 'Original signal');
 
 % Plot the mixed signals
-plotMatrix(X, 4, RowsToAnalyze, 2, 'Mixed signal');
+plotMatrix(X, 3, RowsToAnalyze, 2, 'Mixed signal');
 
 % Do the different types of analysis
 Y1 = fastICA(X(1:RowsToAnalyze, :), RowsToFind, ICAType, 0);
 Y2 = kICA(X(1:RowsToAnalyze, :), RowsToFind);
 Y3 = PCA(X(1:RowsToAnalyze, :), RowsToFind);
 
-% Normalize results to range 0-1
+% Normalize results to range [-1, 1]
 Y1 = normalizeAudio(Y1);
 Y2 = normalizeAudio(Y2);
 Y3 = normalizeAudio(Y3);
@@ -51,8 +51,13 @@ Y1 = matchMatrices(S, Y1, RowsToFind);
 Y2 = matchMatrices(S, Y2, RowsToFind);
 Y3 = matchMatrices(S, Y3, RowsToFind);
 
-plotMatrix(Y1, 4, RowsToAnalyze, 3, 'fastICA result');
-plotMatrix(Y3, 4, RowsToAnalyze, 4, 'PCA result');
+if strcmp(PlotFunction,'fastICA')
+    plotMatrix(Y1, 3, RowsToAnalyze, 3, 'fastICA result');
+elseif strcmp(PlotFunction, 'kICA')
+    plotMatrix(Y2, 3, RowsToAnalyze, 3, 'kICA result');
+elseif strcmp(PlotFunction, 'PCA')
+    plotMatrix(Y3, 3, RowsToAnalyze, 3, 'PCA result');
+end
 
 % Print out the results
 for i = 1:RowsToFind
